@@ -1,4 +1,4 @@
-package models
+package junit
 
 import (
 	"encoding/xml"
