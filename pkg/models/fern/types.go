@@ -1,4 +1,4 @@
-package models
+package fern
 
 import (
 	"time"

@@ -1,26 +1,39 @@
-# fern-junit-client
-A cli that can read junit reports and send them to a fern reporter instance in a format it understands
+# Fern JUnit Client
+
+A CLI that can read JUnit test reports and send them to a Fern Reporter instance in a format it understands
 
 ## Introduction
-If you don't know what fern is, [check it out here!](https://github.com/Guidewire/fern-reporter) This repository is a command line tool to enable users to send their test results from other formats than Ginkgo to the Fern reporter. Currently only JUnit is supported but it could be easily extended to support other formats as well.
+
+If you don't know what Fern is, [check it out here!](https://github.com/guidewire-oss/fern-reporter)
+
+## Install
+
+To install the CLI, use the following command:
+
+```sh
+go install github.com/guidewire-oss/fern-junit-client@latest
+```
 
 ## Usage
-Build the tool with the following command to create the `fern-junit-client` executable:
-```bash
-go build
-```
-Now send your test reports to Fern:
-```bash
-./fern-junit-client <test format> -u <Fern reporter URL> -n <project name> -d <test report dir>
-```
-For example:
-```bash
-./fern-junit-client junit -u "http://localhost:8080" -n "MyMicroservice" -d "/path/to/tests"
+
+To see all available options, use `fern-junit-client help`
+
+### Examples
+
+#### Send Single Report
+
+```sh
+fern-junit-client send -u "http://localhost:8080" -p "MyService" -f "report.xml"
 ```
 
-To see all available options, use `./fern-junit-client help`
+#### Send Multiple Reports
+
+```sh
+fern-junit-client send -u "http://localhost:8080" -p "MyService" -f "tests/*.xml"
+```
 
 ## See Also
-* [Fern UI](https://github.com/Guidewire/fern-ui)
-* [Fern Reporter](https://github.com/Guidewire/fern-reporter)
+
+* [Fern UI](https://github.com/guidewire-oss/fern-ui)
+* [Fern Reporter](https://github.com/guidewire-oss/fern-reporter)
 * [Fern Ginkgo Client](https://github.com/guidewire-oss/fern-ginkgo-client)
