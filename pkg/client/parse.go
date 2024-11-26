@@ -28,8 +28,20 @@ func parseReports(testRun *fern.TestRun, filePattern string, verbose bool) error
 		}
 		testRun.SuiteRuns = append(testRun.SuiteRuns, suiteRun...)
 	}
-	// TODO: set testRun.StartTime to the earliest suite start time
-	// TODO: set testRun.EndTime to the latest suite end time
+	for _, suiteRun := range testRun.SuiteRuns {
+		// Set testRun.StartTime to the earliest suite start time
+		if testRun.StartTime.IsZero() || suiteRun.StartTime.Compare(testRun.StartTime) < 0 {
+			testRun.StartTime = suiteRun.StartTime
+		}
+		// Set testRun.EndTime to the latest suite end time
+		if testRun.EndTime.IsZero() || suiteRun.EndTime.Compare(testRun.EndTime) > 0 {
+			testRun.EndTime = suiteRun.EndTime
+		}
+	}
+	if verbose {
+		log.Default().Printf("TestRun start time: %s\n", testRun.StartTime.String())
+		log.Default().Printf("TestRun end time: %s\n", testRun.EndTime.String())
+	}
 	return nil
 }
 
