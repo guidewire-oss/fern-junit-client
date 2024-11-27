@@ -161,8 +161,8 @@ func parseTestSuite(testSuite junit.TestSuite, verbose bool) (suiteRun fern.Suit
 	return
 }
 
-func getEndTime(startTime time.Time, duration string) (endTime time.Time, err error) {
-	ms, err := time.ParseDuration(duration + "s")
+func getEndTime(startTime time.Time, durationSeconds string) (endTime time.Time, err error) {
+	ms, err := time.ParseDuration(durationSeconds + "s")
 	endTime = startTime.Add(ms)
 	return
 }
