@@ -7,13 +7,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/fern"
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/junit"
 )
 
-func parseReports(testRun *fern.TestRun, filePattern string, verbose bool) error {
+func parseReports(testRun *fern.TestRun, filePattern string, tags string, verbose bool) error {
 	files, err := filepath.Glob(filePattern)
 	if err != nil {
 		return fmt.Errorf("failed to parse file pattern %s: %w", filePattern, err)
@@ -22,7 +23,7 @@ func parseReports(testRun *fern.TestRun, filePattern string, verbose bool) error
 		return fmt.Errorf("no files found for pattern %s", filePattern)
 	}
 	for _, file := range files {
-		suiteRun, err := parseReport(file, verbose)
+		suiteRun, err := parseReport(file, tags, verbose)
 		if err != nil {
 			return fmt.Errorf("failed to parse report %s: %w", file, err)
 		}
@@ -45,7 +46,7 @@ func parseReports(testRun *fern.TestRun, filePattern string, verbose bool) error
 	return nil
 }
 
-func parseReport(filePath string, verbose bool) ([]fern.SuiteRun, error) {
+func parseReport(filePath string, tags string, verbose bool) ([]fern.SuiteRun, error) {
 	var testSuites junit.TestSuites
 	var testSuite junit.TestSuite
 	var suiteRuns []fern.SuiteRun
@@ -78,7 +79,7 @@ func parseReport(filePath string, verbose bool) ([]fern.SuiteRun, error) {
 	}
 
 	for _, suite := range testSuites.TestSuites {
-		run, err := parseTestSuite(suite, verbose)
+		run, err := parseTestSuite(suite, tags, verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +88,7 @@ func parseReport(filePath string, verbose bool) ([]fern.SuiteRun, error) {
 	return suiteRuns, err
 }
 
-func parseTestSuite(testSuite junit.TestSuite, verbose bool) (suiteRun fern.SuiteRun, err error) {
+func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suiteRun fern.SuiteRun, err error) {
 	if verbose {
 		log.Default().Printf("Parsing TestSuite %s\n", testSuite.Name)
 	}
@@ -150,7 +151,7 @@ func parseTestSuite(testSuite junit.TestSuite, verbose bool) (suiteRun fern.Suit
 			SpecDescription: testCase.Name,
 			Status:          status,
 			Message:         message,
-			Tags:            []fern.Tag{}, // TODO: add ability to specify tags
+			Tags:            convertToTags(tags),
 			StartTime:       startTime,
 			EndTime:         endTime,
 		}
@@ -164,5 +165,12 @@ func parseTestSuite(testSuite junit.TestSuite, verbose bool) (suiteRun fern.Suit
 func getEndTime(startTime time.Time, durationSeconds string) (endTime time.Time, err error) {
 	ms, err := time.ParseDuration(durationSeconds + "s")
 	endTime = startTime.Add(ms)
+	return
+}
+
+func convertToTags(tagString string) (tags []fern.Tag) {
+	for _, tag := range strings.Split(tagString, ",") {
+		tags = append(tags, fern.Tag{Name: tag})
+	}
 	return
 }

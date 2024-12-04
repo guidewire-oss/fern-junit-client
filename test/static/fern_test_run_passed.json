@@ -1,1 +1,87 @@
-{"id":0,"test_project_name":"Fern JUnit Client Test","test_seed":0,"start_time":"2024-11-01T18:23:56Z","end_time":"2024-11-01T18:23:56.12Z","suite_runs":[{"id":0,"test_run_id":0,"suite_name":"com.guidewire.ccs.FernJavaClientTests","start_time":"2024-11-01T18:23:56Z","end_time":"2024-11-01T18:23:56.12Z","spec_runs":[{"id":0,"suite_id":0,"spec_description":"report()","status":"passed","message":"","tags":[],"start_time":"2024-11-01T18:23:56Z","end_time":"2024-11-01T18:23:56.106Z"},{"id":0,"suite_id":0,"spec_description":"whackTest()","status":"passed","message":"","tags":[],"start_time":"2024-11-01T18:23:56.106Z","end_time":"2024-11-01T18:23:56.117Z"},{"id":0,"suite_id":0,"spec_description":"goodTest()","status":"passed","message":"","tags":[],"start_time":"2024-11-01T18:23:56.117Z","end_time":"2024-11-01T18:23:56.118Z"}]}]}
+{
+  "id": 0,
+  "test_project_name": "Fern JUnit Client Test",
+  "test_seed": 0,
+  "start_time": "2024-11-01T18:23:56Z",
+  "end_time": "2024-11-01T18:23:56.12Z",
+  "suite_runs": [
+    {
+      "id": 0,
+      "test_run_id": 0,
+      "suite_name": "com.guidewire.ccs.FernJavaClientTests",
+      "start_time": "2024-11-01T18:23:56Z",
+      "end_time": "2024-11-01T18:23:56.12Z",
+      "spec_runs": [
+        {
+          "id": 0,
+          "suite_id": 0,
+          "spec_description": "report()",
+          "status": "passed",
+          "message": "",
+          "tags": [
+            {
+              "id": 0,
+              "name": "test"
+            },
+            {
+              "id": 0,
+              "name": "tagtest"
+            },
+            {
+              "id": 0,
+              "name": "9=-+_"
+            }
+          ],
+          "start_time": "2024-11-01T18:23:56Z",
+          "end_time": "2024-11-01T18:23:56.106Z"
+        },
+        {
+          "id": 0,
+          "suite_id": 0,
+          "spec_description": "whackTest()",
+          "status": "passed",
+          "message": "",
+          "tags": [
+            {
+              "id": 0,
+              "name": "test"
+            },
+            {
+              "id": 0,
+              "name": "tagtest"
+            },
+            {
+              "id": 0,
+              "name": "9=-+_"
+            }
+          ],
+          "start_time": "2024-11-01T18:23:56.106Z",
+          "end_time": "2024-11-01T18:23:56.117Z"
+        },
+        {
+          "id": 0,
+          "suite_id": 0,
+          "spec_description": "goodTest()",
+          "status": "passed",
+          "message": "",
+          "tags": [
+            {
+              "id": 0,
+              "name": "test"
+            },
+            {
+              "id": 0,
+              "name": "tagtest"
+            },
+            {
+              "id": 0,
+              "name": "9=-+_"
+            }
+          ],
+          "start_time": "2024-11-01T18:23:56.117Z",
+          "end_time": "2024-11-01T18:23:56.118Z"
+        }
+      ]
+    }
+  ]
+}

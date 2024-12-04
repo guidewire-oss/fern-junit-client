@@ -13,6 +13,7 @@ var (
 	fernUrl     string
 	projectName string
 	filePattern string
+	tags        string
 )
 
 var sendCmd = &cobra.Command{
@@ -20,7 +21,7 @@ var sendCmd = &cobra.Command{
 	Short: "Send JUnit test reports to Fern",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := client.SendReports(fernUrl, projectName, filePattern, verbose); err != nil {
+		if err := client.SendReports(fernUrl, projectName, filePattern, tags, verbose); err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
 			os.Exit(1)
 		}
@@ -31,6 +32,7 @@ func init() {
 	sendCmd.PersistentFlags().StringVarP(&fernUrl, "fern-url", "u", "", "base URL of the Fern Reporter instance to send test reports to (required)")
 	sendCmd.PersistentFlags().StringVarP(&projectName, "project-name", "p", "", "name of the project to associate test reports with (required)")
 	sendCmd.PersistentFlags().StringVarP(&filePattern, "file-pattern", "f", "", "file name pattern of test reports to send to Fern (required)")
+	sendCmd.PersistentFlags().StringVarP(&tags, "tags", "t", "", "comma-separated tags to be included on runs")
 	sendCmd.MarkPersistentFlagRequired("fern-url")
 	sendCmd.MarkPersistentFlagRequired("project-name")
 	sendCmd.MarkPersistentFlagRequired("file-pattern")
