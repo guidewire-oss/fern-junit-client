@@ -13,6 +13,7 @@ func Test_parseReports(t *testing.T) {
 	type args struct {
 		testRun     *fern.TestRun
 		filePattern string
+		tags        string
 		verbose     bool
 	}
 	tests := []struct {
@@ -25,6 +26,7 @@ func Test_parseReports(t *testing.T) {
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: reportsCombinedPattern,
+				tags:        "test,tagtest,9=-+_",
 				verbose:     true,
 			},
 			wantErr: false,
@@ -34,6 +36,7 @@ func Test_parseReports(t *testing.T) {
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: reportFailedPath,
+				tags:        "test,tagtest,9=-+_",
 				verbose:     true,
 			},
 			wantErr: false,
@@ -43,6 +46,7 @@ func Test_parseReports(t *testing.T) {
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: reportPassedPath,
+				tags:        "test,tagtest,9=-+_",
 				verbose:     true,
 			},
 			wantErr: false,
@@ -52,6 +56,7 @@ func Test_parseReports(t *testing.T) {
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: nonExistentFilePath,
+				tags:        "test,tagtest,9=-+_",
 				verbose:     true,
 			},
 			wantErr: true,
@@ -59,7 +64,7 @@ func Test_parseReports(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := parseReports(tt.args.testRun, tt.args.filePattern, tt.args.verbose); (err != nil) != tt.wantErr {
+			if err := parseReports(tt.args.testRun, tt.args.filePattern, tt.args.tags, tt.args.verbose); (err != nil) != tt.wantErr {
 				t.Errorf("parseReports() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -69,6 +74,7 @@ func Test_parseReports(t *testing.T) {
 func Test_parseReport(t *testing.T) {
 	type args struct {
 		filePath string
+		tags     string
 		verbose  bool
 	}
 	tests := []struct {
@@ -81,6 +87,7 @@ func Test_parseReport(t *testing.T) {
 			name: "failed report",
 			args: args{
 				filePath: reportFailedPath,
+				tags:     "test,tagtest,9=-+_",
 				verbose:  true,
 			},
 			want:    fernTestRunFailed.SuiteRuns,
@@ -90,6 +97,7 @@ func Test_parseReport(t *testing.T) {
 			name: "passed report",
 			args: args{
 				filePath: reportPassedPath,
+				tags:     "test,tagtest,9=-+_",
 				verbose:  true,
 			},
 			want:    fernTestRunPassed.SuiteRuns,
@@ -99,6 +107,7 @@ func Test_parseReport(t *testing.T) {
 			name: "non-existent report",
 			args: args{
 				filePath: nonExistentFilePath,
+				tags:     "test,tagtest,9=-+_",
 				verbose:  true,
 			},
 			want:    nil,
@@ -107,7 +116,7 @@ func Test_parseReport(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseReport(tt.args.filePath, tt.args.verbose)
+			got, err := parseReport(tt.args.filePath, tt.args.tags, tt.args.verbose)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseReport() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -122,6 +131,7 @@ func Test_parseReport(t *testing.T) {
 func Test_parseTestSuite(t *testing.T) {
 	type args struct {
 		testSuite junit.TestSuite
+		tags      string
 		verbose   bool
 	}
 	tests := []struct {
@@ -134,6 +144,7 @@ func Test_parseTestSuite(t *testing.T) {
 			name: "failed suite",
 			args: args{
 				testSuite: junitTestSuiteFailed,
+				tags:      "test,tagtest,9=-+_",
 				verbose:   true,
 			},
 			wantSuiteRun: fernTestRunFailed.SuiteRuns[0],
@@ -143,6 +154,7 @@ func Test_parseTestSuite(t *testing.T) {
 			name: "passed suite",
 			args: args{
 				testSuite: junitTestSuitePassed,
+				tags:      "test,tagtest,9=-+_",
 				verbose:   true,
 			},
 			wantSuiteRun: fernTestRunPassed.SuiteRuns[0],
@@ -152,6 +164,7 @@ func Test_parseTestSuite(t *testing.T) {
 			name: "empty suite",
 			args: args{
 				testSuite: junit.TestSuite{},
+				tags:      "test,tagtest,9=-+_",
 				verbose:   true,
 			},
 			wantSuiteRun: fern.SuiteRun{},
@@ -160,7 +173,7 @@ func Test_parseTestSuite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotSuiteRun, err := parseTestSuite(tt.args.testSuite, tt.args.verbose)
+			gotSuiteRun, err := parseTestSuite(tt.args.testSuite, tt.args.tags, tt.args.verbose)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseTestSuite() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -220,6 +233,68 @@ func Test_getEndTime(t *testing.T) {
 			}
 			if !reflect.DeepEqual(gotEndTime, tt.wantEndTime) {
 				t.Errorf("getEndTime() = %v, want %v", gotEndTime, tt.wantEndTime)
+			}
+		})
+	}
+}
+
+func Test_convertToTags(t *testing.T) {
+	type args struct {
+		tagString string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantTags []fern.Tag
+	}{
+		{
+			name: "single tag",
+			args: args{
+				tagString: "test",
+			},
+			wantTags: []fern.Tag{
+				{
+					Name: "test",
+				},
+			},
+		},
+		{
+			name: "simple string",
+			args: args{
+				tagString: "test,tagtest,9=-+_",
+			},
+			wantTags: []fern.Tag{
+				{
+					Name: "test",
+				},
+				{
+					Name: "tagtest",
+				},
+				{
+					Name: "9=-+_",
+				},
+			},
+		},
+		{
+			name: "unicode string",
+			args: args{
+				tagString: "🤔😯😲🤯,あなたこれを読んだ!",
+			},
+			wantTags: []fern.Tag{
+				{
+					Name: "🤔😯😲🤯",
+				},
+				{
+					Name: "あなたこれを読んだ!",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tags := convertToTags(tt.args.tagString)
+			if !reflect.DeepEqual(tags, tt.wantTags) {
+				t.Errorf("getEndTime() = %v, want %v", tags, tt.wantTags)
 			}
 		})
 	}

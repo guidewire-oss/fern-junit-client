@@ -23,6 +23,8 @@ const (
 	fernTestRunCombinedPath = "../../test/static/fern_test_run_combined.json"
 	fernTestRunFailedPath   = "../../test/static/fern_test_run_failed.json"
 	fernTestRunPassedPath   = "../../test/static/fern_test_run_passed.json"
+
+	exampleTags = "test,tagtest,9=-+_"
 )
 
 var (
