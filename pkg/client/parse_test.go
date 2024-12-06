@@ -237,3 +237,65 @@ func Test_getEndTime(t *testing.T) {
 		})
 	}
 }
+
+func Test_convertToTags(t *testing.T) {
+	type args struct {
+		tagString string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantTags []fern.Tag
+	}{
+		{
+			name: "single tag",
+			args: args{
+				tagString: "test",
+			},
+			wantTags: []fern.Tag{
+				{
+					Name: "test",
+				},
+			},
+		},
+		{
+			name: "simple string",
+			args: args{
+				tagString: "test,tagtest,9=-+_",
+			},
+			wantTags: []fern.Tag{
+				{
+					Name: "test",
+				},
+				{
+					Name: "tagtest",
+				},
+				{
+					Name: "9=-+_",
+				},
+			},
+		},
+		{
+			name: "unicode string",
+			args: args{
+				tagString: "🤔😯😲🤯,あなたこれを読んだ!",
+			},
+			wantTags: []fern.Tag{
+				{
+					Name: "🤔😯😲🤯",
+				},
+				{
+					Name: "あなたこれを読んだ!",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tags := convertToTags(tt.args.tagString)
+			if !reflect.DeepEqual(tags, tt.wantTags) {
+				t.Errorf("getEndTime() = %v, want %v", tags, tt.wantTags)
+			}
+		})
+	}
+}
