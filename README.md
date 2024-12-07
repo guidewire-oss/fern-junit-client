@@ -46,4 +46,4 @@ To execute the tests, run `make test`
 
 ### Generating Test Static Files
 
-To generate the static files used in the tests, run `make test-static-files`
+To generate the static files used in the tests, run `make generate-test-files`
