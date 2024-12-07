@@ -6,6 +6,6 @@ build:
 test:
 	go test -v ./...
 
-.PHONY: test-static-files
-test-static-files:
-	GENERATE_STATIC_FILES=true go test -v ./...
+.PHONY: generate-test-files
+generate-test-files:
+	go test ./pkg/client/

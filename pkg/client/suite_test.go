@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"testing"
 
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/fern"
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/junit"
@@ -24,9 +23,10 @@ const (
 	reportFailedPath       = "../../test/static/junit_report_failed.xml"
 	reportPassedPath       = "../../test/static/junit_report_passed.xml"
 
-	fernTestRunCombinedPath = "../../test/static/fern_test_run_combined.json"
-	fernTestRunFailedPath   = "../../test/static/fern_test_run_failed.json"
-	fernTestRunPassedPath   = "../../test/static/fern_test_run_passed.json"
+	fernGeneratedTestFilesPath = "../../test/generated"
+	fernTestRunCombinedPath    = "../../test/generated/fern_test_run_combined.json"
+	fernTestRunFailedPath      = "../../test/generated/fern_test_run_failed.json"
+	fernTestRunPassedPath      = "../../test/generated/fern_test_run_passed.json"
 )
 
 var (
@@ -41,6 +41,49 @@ var (
 )
 
 func init() {
+	// Generate static JSON files used in tests
+	if err := os.RemoveAll(fernGeneratedTestFilesPath); err != nil {
+		panic(err)
+	}
+	if err := os.Mkdir(fernGeneratedTestFilesPath, 0750); err != nil {
+		panic(err)
+	}
+
+	generateFernTestRunJson := func(testCase, filePattern, outputFilename string) {
+		// Create mock Fern reporter that writes JSON payload to a file
+		mockReporterWriter := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer r.Body.Close()
+			testRun := &fern.TestRun{}
+			if data, err := io.ReadAll(r.Body); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			} else if err := json.Unmarshal(data, testRun); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+			} else {
+				w.WriteHeader(http.StatusOK)
+				// Format JSON
+				formattedJson, err := json.MarshalIndent(testRun, "", "  ")
+				if err != nil {
+					panic(err)
+				}
+				// Save JSON
+				f, err := os.Create(outputFilename)
+				if err != nil {
+					panic(err)
+				}
+				defer f.Close()
+				_, err = f.Write(formattedJson)
+				if err != nil {
+					panic(err)
+				}
+			}
+		}))
+		// Run SendReports with input
+		if err := SendReports(mockReporterWriter.URL, testProjectName, filePattern, exampleTags, true); err != nil {
+			panic(fmt.Errorf("failed to generate Fern test run JSON for '%s' test case (%s): %w", testCase, filePattern, err))
+		}
+		mockReporterWriter.Close()
+	}
+
 	// Create mock Fern reporter
 	mockFernReporter = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
@@ -52,6 +95,11 @@ func init() {
 			w.WriteHeader(http.StatusOK)
 		}
 	}))
+
+	// Call generateFernTestRunJson for each test case
+	generateFernTestRunJson("reports combined", reportsCombinedPattern, fernTestRunCombinedPath)
+	generateFernTestRunJson("failed report", reportFailedPath, fernTestRunFailedPath)
+	generateFernTestRunJson("passed report", reportPassedPath, fernTestRunPassedPath)
 
 	// Unmarshal JUnit test data
 	junitTestSuiteFailed = junit.TestSuite{}
@@ -89,50 +137,4 @@ func init() {
 	} else if err := json.Unmarshal(bytes, &fernTestRunPassed); err != nil {
 		panic(err)
 	}
-}
-
-func TestGenerateStaticJsonFiles(t *testing.T) {
-	// Skip on normal test execution
-	if os.Getenv("GENERATE_STATIC_FILES") != "true" {
-		t.SkipNow()
-	}
-	// Generate static JSON files used in tests
-	generateFernTestRunJson := func(testCase, filePattern, outputFilename string) {
-		// Create mock Fern reporter that writes JSON payload to a file
-		mockFernReporter := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			defer r.Body.Close()
-			testRun := &fern.TestRun{}
-			if data, err := io.ReadAll(r.Body); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			} else if err := json.Unmarshal(data, testRun); err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-			} else {
-				w.WriteHeader(http.StatusOK)
-				// Format JSON
-				formattedJson, err := json.MarshalIndent(testRun, "", "  ")
-				if err != nil {
-					panic(err)
-				}
-				// Save JSON
-				f, err := os.Create(outputFilename)
-				if err != nil {
-					panic(err)
-				}
-				defer f.Close()
-				_, err = f.Write(formattedJson)
-				if err != nil {
-					panic(err)
-				}
-			}
-		}))
-		defer mockFernReporter.Close()
-		// Run SendReports with input
-		if err := SendReports(mockFernReporter.URL, testProjectName, filePattern, exampleTags, true); err != nil {
-			panic(fmt.Errorf("failed to generate Fern test run JSON for '%s' test case (%s): %w", testCase, filePattern, err))
-		}
-	}
-	// Call generateFernTestRunJson for each test case
-	generateFernTestRunJson("reports combined", reportsCombinedPattern, fernTestRunCombinedPath)
-	generateFernTestRunJson("failed report", reportFailedPath, fernTestRunFailedPath)
-	generateFernTestRunJson("passed report", reportPassedPath, fernTestRunPassedPath)
 }
