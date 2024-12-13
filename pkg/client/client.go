@@ -10,7 +10,7 @@ import (
 	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 )
 
-func SendReports(fernUrl, projectName, filePattern string, tags string, verbose bool) error {
+func SendReports(fernUrl, projectName, filePattern string, tags string, verbose bool, metricsFilePath string) error {
 	var testRun fern.TestRun
 	testRun.TestProjectName = projectName
 	testRun.TestSeed = uint64(util.GlobalClock.Now().Nanosecond())
@@ -37,7 +37,7 @@ func SendReports(fernUrl, projectName, filePattern string, tags string, verbose 
 
 	go func() {
 		defer wg.Done()
-		if err := recordTestRunMetrics(testRun); err != nil {
+		if err := recordTestRunMetrics(testRun, metricsFilePath); err != nil {
 			errChan <- err
 		}
 	}()
@@ -51,7 +51,7 @@ func SendReports(fernUrl, projectName, filePattern string, tags string, verbose 
 	return nil
 }
 
-func recordTestRunMetrics(testRun fern.TestRun) error {
+func recordTestRunMetrics(testRun fern.TestRun, metricsFilePath string) error {
 	passed, failed, skipped := 0, 0, 0
 	for _, suiteRun := range testRun.SuiteRuns {
 		for _, specRun := range suiteRun.SpecRuns {
@@ -70,7 +70,7 @@ func recordTestRunMetrics(testRun fern.TestRun) error {
 	log.Default().Printf("Total tests failed: %d\n", failed)
 	log.Default().Printf("Total tests skipped: %d\n", skipped)
 
-	if file, err := os.Create("test/generated/fern_test_run_metrics.txt"); err != nil {
+	if file, err := os.Create(metricsFilePath); err != nil {
 		return err
 	} else {
 		file.WriteString(fmt.Sprintf("passed: %d\nfailed: %d\nskipped: %d\n", passed, failed, skipped))
