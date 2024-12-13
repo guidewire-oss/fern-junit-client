@@ -95,6 +95,8 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 
 	suiteRun.SuiteName = testSuite.Name
 
+	log.Default().Printf("timeStamp value %s\n", testSuite.Timestamp)
+
 	suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp)
 	if err != nil {
 		suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp+"Z")
