@@ -95,16 +95,21 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 
 	suiteRun.SuiteName = testSuite.Name
 
-	log.Default().Printf("timeStamp value %s\n", testSuite.Timestamp)
-
-	suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp)
-	if err != nil {
-		suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp+"Z")
+	if testSuite.Timestamp == "" {
+		log.Default().Printf("Timestamp is empty, using current time\n")
+		suiteRun.StartTime = time.Now()
+	} else {
+		suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp)
 		if err != nil {
-			err = fmt.Errorf("failed to parse suite start time: %w", err)
-			return
+			// Attempt to parse with a "Z" suffix for UTC time if the initial parsing fails
+			suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp+"Z")
+			if err != nil {
+				err = fmt.Errorf("failed to parse suite start time: %w", err)
+				return
+			}
 		}
 	}
+
 	suiteRun.EndTime, err = getEndTime(suiteRun.StartTime, testSuite.Time)
 	if err != nil {
 		err = fmt.Errorf("failed to calculate suite end time: %w", err)

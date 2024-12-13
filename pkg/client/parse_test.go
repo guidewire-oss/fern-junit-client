@@ -61,6 +61,16 @@ func Test_parseReports(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "no optinal fields",
+			args: args{
+				testRun:     &fern.TestRun{},
+				filePattern: reportNoOptionalFieldsPath,
+				tags:        "test,tagtest,9=-+_",
+				verbose:     true,
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

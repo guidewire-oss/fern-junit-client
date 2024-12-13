@@ -20,9 +20,10 @@ const (
 
 	nonExistentFilePath = "this_file_does_not_exist"
 
-	reportsCombinedPattern = "../../test/static/*.xml"
-	reportFailedPath       = "../../test/static/junit_report_failed.xml"
-	reportPassedPath       = "../../test/static/junit_report_passed.xml"
+	reportsCombinedPattern     = "../../test/static/*.xml"
+	reportFailedPath           = "../../test/static/junit_report_failed.xml"
+	reportPassedPath           = "../../test/static/junit_report_passed.xml"
+	reportNoOptionalFieldsPath = "../../test/static/junit_report_no_optional_passed.xml"
 
 	fernTestRunCombinedPath = "../../test/static/fern_test_run_combined.json"
 	fernTestRunFailedPath   = "../../test/static/fern_test_run_failed.json"
