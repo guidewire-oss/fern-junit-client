@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/guidewire-oss/fern-junit-client/cmd"
 )
@@ -18,5 +19,6 @@ const banner = `
 
 func main() {
 	fmt.Print(strings.TrimLeft(banner, "\n"))
+	time.Sleep(1 * time.Microsecond)
 	cmd.Execute()
 }

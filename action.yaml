@@ -1,0 +1,110 @@
+name: 'Report to fern'
+description: 'Send JUnit test reports to a Fern reporter'
+inputs:
+  url:
+    description: 'URL of Fern reporter'
+    required: true
+  file-pattern:
+    description: 'Directory or pattern where JUnit reports get generated; accepts `*` as a wildcard'
+    required: true
+  project-name:
+    description: 'Name of the project to display under in Fern'
+    required: true
+    default: '${GITHUB_REPOSITORY#*/}'
+  tags:
+    description: 'Any tags to associate with the suite run'
+    required: false
+  verbose:
+    description: 'Whether to log verbosely. NOTE: If you have many test cases this may substantially increase log size'
+    required: false
+    default: "false"
+  generate-job-summary:
+    description: 'Whether to generate a job summary containing the number of passed, failed, and skipped tests'
+    required: false
+    default: "true"
+outputs:
+  tests-passed:
+    description: 'Number of tests that passed'
+    value: ${{ steps.run-client.outputs.tests-passed }}
+  tests-failed:
+    description: 'Number of tests that failed'
+    value: ${{ steps.run-client.outputs.tests-failed }}
+  tests-skipped:
+    description: 'Number of tests that were skipped'
+    value: ${{ steps.run-client.outputs.tests-skipped }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Install CLI
+      shell: bash
+      run: go install github.com/guidewire-oss/fern-junit-client@latest
+
+    - name: Run client
+      id: run-client
+      shell: bash
+      run: |
+        url="${{ inputs.url }}"
+        file_pattern="${{ inputs.file-pattern }}"
+        project_name="${{ inputs.project-name }}"
+        tags="${{ inputs.tags }}"
+        verbose="${{ inputs.verbose }}"
+      
+        if [ "$verbose" != "true" ]; then
+          verbose=
+        fi
+      
+        fern-junit-client send \
+          -u "$url" \
+          -p "$project_name" \
+          -f "$file_pattern" \
+          ${tags:+-t "$tags"} \
+          ${verbose:+-v}
+
+    - name: Generate metrics
+      shell: bash
+      run: |
+        generate_js="${{ inputs.generate-job-summary }}"
+        
+        # Read the metrics file
+        if [ -f "test/generated/fern_test_run_metrics.txt" ]; then
+          # Parse the file
+          passed=$(grep "passed:" "test/generated/fern_test_run_metrics.txt" | cut -d' ' -f2)
+          failed=$(grep "failed:" "test/generated/fern_test_run_metrics.txt" | cut -d' ' -f2)
+          skipped=$(grep "skipped:" "test/generated/fern_test_run_metrics.txt" | cut -d' ' -f2)
+      
+          # Set output variables
+          echo "tests-passed=${passed:-0}" >> $GITHUB_OUTPUT
+          echo "tests-failed=${failed:-0}" >> $GITHUB_OUTPUT
+          echo "tests-skipped=${skipped:-0}" >> $GITHUB_OUTPUT
+      
+          # Create GitHub Job Summary
+          if [ "$generate_js" = "true" ]; then
+            echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| :white_check_mark: Passed | \`$passed\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| :x: Failed | \`$failed\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| :fast_forward: Skipped | \`$skipped\` |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+      
+            # Calculate total tests and percentage passed
+            total=$((passed + failed + skipped))
+            if [ $total -gt 0 ]; then
+              pass_percentage=$(echo "scale=2; ($passed * 100) / $total" | awk -F. '{print $1"."substr($2,1,2)}')
+              echo "### Overall Statistics" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "- **Total Tests:** \`$total\`" >> $GITHUB_STEP_SUMMARY
+              echo "- **Pass Rate:** \`$pass_percentage%\`" > $GITHUB_STEP_SUMMARY
+            fi
+            echo "Job summary generated"
+          fi
+        else
+          echo "Metrics file not found"
+          exit 1
+        fi
