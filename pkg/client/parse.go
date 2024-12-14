@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 	"io"
 	"log"
 	"os"
@@ -79,7 +80,7 @@ func parseReport(filePath string, tags string, verbose bool) ([]fern.SuiteRun, e
 	}
 
 	for _, suite := range testSuites.TestSuites {
-		run, err := parseTestSuite(suite, tags, verbose)
+		run, err := parseTestSuite(util.RealClock{}, suite, tags, verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +89,7 @@ func parseReport(filePath string, tags string, verbose bool) ([]fern.SuiteRun, e
 	return suiteRuns, err
 }
 
-func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suiteRun fern.SuiteRun, err error) {
+func parseTestSuite(clock util.Clock, testSuite junit.TestSuite, tags string, verbose bool) (suiteRun fern.SuiteRun, err error) {
 	if verbose {
 		log.Default().Printf("Parsing TestSuite %s\n", testSuite.Name)
 	}
@@ -96,8 +97,7 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 	suiteRun.SuiteName = testSuite.Name
 
 	if testSuite.Timestamp == "" {
-		log.Default().Printf("Timestamp is empty, using current time\n")
-		suiteRun.StartTime = time.Now()
+		suiteRun.StartTime = clock.Now()
 	} else {
 		suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp)
 		if err != nil {
@@ -124,10 +124,6 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 	startTime := suiteRun.StartTime
 	var endTime time.Time
 	for _, testCase := range testSuite.TestCases {
-		if verbose {
-			log.Default().Printf("Parsing TestCase %s\n", testCase.Name)
-		}
-
 		status := ""
 		message := ""
 		if len(testCase.Failures) > 0 {
@@ -148,12 +144,6 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 			return
 		}
 
-		if verbose {
-			log.Default().Printf("Test start time: %s\n", startTime.String())
-			log.Default().Printf("Test end time: %s\n", endTime.String())
-			log.Default().Printf("Test status: %s\n", status)
-		}
-
 		specRun := fern.SpecRun{
 			SpecDescription: testCase.Name,
 			Status:          status,
@@ -165,6 +155,10 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 		suiteRun.SpecRuns = append(suiteRun.SpecRuns, specRun)
 
 		startTime = endTime
+
+		if verbose {
+			log.Default().Printf("%#v\n", startTime.String())
+		}
 	}
 	return
 }
