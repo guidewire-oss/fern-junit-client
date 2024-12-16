@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -22,7 +21,7 @@ var sendCmd = &cobra.Command{
 	Short: "Send JUnit test reports to Fern",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := client.SendReports(util.RealClock{}, fernUrl, projectName, filePattern, tags, verbose); err != nil {
+		if err := client.SendReports(fernUrl, projectName, filePattern, tags, verbose); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
 			os.Exit(1)
 		}

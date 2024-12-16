@@ -2,6 +2,8 @@ package util
 
 import "time"
 
+var GlobalClock Clock = RealClock{}
+
 type Clock interface {
 	Now() time.Time
 	// Add other time methods as necessary

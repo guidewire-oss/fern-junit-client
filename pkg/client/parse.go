@@ -80,7 +80,7 @@ func parseReport(filePath string, tags string, verbose bool) ([]fern.SuiteRun, e
 	}
 
 	for _, suite := range testSuites.TestSuites {
-		run, err := parseTestSuite(util.RealClock{}, suite, tags, verbose)
+		run, err := parseTestSuite(suite, tags, verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func parseReport(filePath string, tags string, verbose bool) ([]fern.SuiteRun, e
 	return suiteRuns, err
 }
 
-func parseTestSuite(clock util.Clock, testSuite junit.TestSuite, tags string, verbose bool) (suiteRun fern.SuiteRun, err error) {
+func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suiteRun fern.SuiteRun, err error) {
 	if verbose {
 		log.Default().Printf("Parsing TestSuite %s\n", testSuite.Name)
 	}
@@ -97,7 +97,7 @@ func parseTestSuite(clock util.Clock, testSuite junit.TestSuite, tags string, ve
 	suiteRun.SuiteName = testSuite.Name
 
 	if testSuite.Timestamp == "" {
-		suiteRun.StartTime = clock.Now()
+		suiteRun.StartTime = util.GlobalClock.Now()
 	} else {
 		suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp)
 		if err != nil {
@@ -117,13 +117,16 @@ func parseTestSuite(clock util.Clock, testSuite junit.TestSuite, tags string, ve
 	}
 
 	if verbose {
-		log.Default().Printf("Suite start time: %s\n", suiteRun.StartTime.String())
-		log.Default().Printf("Suite end time: %s\n", suiteRun.EndTime.String())
+		log.Default().Printf("Resulting SuiteRun: %#v\n", suiteRun)
 	}
 
 	startTime := suiteRun.StartTime
 	var endTime time.Time
 	for _, testCase := range testSuite.TestCases {
+		if verbose {
+			log.Default().Printf("Parsing TestCase %s\n", testCase.Name)
+		}
+
 		status := ""
 		message := ""
 		if len(testCase.Failures) > 0 {
@@ -157,7 +160,7 @@ func parseTestSuite(clock util.Clock, testSuite junit.TestSuite, tags string, ve
 		startTime = endTime
 
 		if verbose {
-			log.Default().Printf("%#v\n", specRun)
+			log.Default().Printf("Resulting SpecRun: %#v\n", specRun)
 		}
 	}
 	return

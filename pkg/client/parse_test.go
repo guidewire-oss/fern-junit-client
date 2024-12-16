@@ -145,7 +145,7 @@ func Test_parseTestSuite(t *testing.T) {
 		tags      string
 		verbose   bool
 	}
-	testClock := util.NewMockClock()
+	util.GlobalClock = util.NewMockClock()
 	tests := []struct {
 		name         string
 		args         args
@@ -179,13 +179,13 @@ func Test_parseTestSuite(t *testing.T) {
 				tags:      "test,tagtest,9=-+_",
 				verbose:   true,
 			},
-			wantSuiteRun: fern.SuiteRun{StartTime: testClock.Now(), EndTime: testClock.Now()},
+			wantSuiteRun: fern.SuiteRun{StartTime: util.GlobalClock.Now(), EndTime: util.GlobalClock.Now()},
 			wantErr:      true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotSuiteRun, err := parseTestSuite(testClock, tt.args.testSuite, tt.args.tags, tt.args.verbose)
+			gotSuiteRun, err := parseTestSuite(tt.args.testSuite, tt.args.tags, tt.args.verbose)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseTestSuite() error = %v, wantErr %v", err, tt.wantErr)
 				return
