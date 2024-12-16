@@ -63,7 +63,7 @@ func Test_parseReports(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "no optinal fields",
+			name: "no optional fields",
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: reportNoOptionalFieldsPath,

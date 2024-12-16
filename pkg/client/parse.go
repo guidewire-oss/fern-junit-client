@@ -157,7 +157,7 @@ func parseTestSuite(clock util.Clock, testSuite junit.TestSuite, tags string, ve
 		startTime = endTime
 
 		if verbose {
-			log.Default().Printf("%#v\n", startTime.String())
+			log.Default().Printf("%#v\n", specRun)
 		}
 	}
 	return
