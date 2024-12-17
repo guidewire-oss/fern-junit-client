@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 	"reflect"
 	"testing"
 	"time"
@@ -60,6 +61,16 @@ func Test_parseReports(t *testing.T) {
 				verbose:     true,
 			},
 			wantErr: true,
+		},
+		{
+			name: "no optional fields",
+			args: args{
+				testRun:     &fern.TestRun{},
+				filePattern: reportNoOptionalFieldsPath,
+				tags:        "test,tagtest,9=-+_",
+				verbose:     true,
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -134,6 +145,7 @@ func Test_parseTestSuite(t *testing.T) {
 		tags      string
 		verbose   bool
 	}
+	util.GlobalClock = util.NewMockClock()
 	tests := []struct {
 		name         string
 		args         args
@@ -167,7 +179,7 @@ func Test_parseTestSuite(t *testing.T) {
 				tags:      "test,tagtest,9=-+_",
 				verbose:   true,
 			},
-			wantSuiteRun: fern.SuiteRun{},
+			wantSuiteRun: fern.SuiteRun{StartTime: util.GlobalClock.Now(), EndTime: util.GlobalClock.Now()},
 			wantErr:      true,
 		},
 	}

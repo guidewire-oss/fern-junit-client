@@ -22,7 +22,7 @@ var sendCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := client.SendReports(fernUrl, projectName, filePattern, tags, verbose); err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
 			os.Exit(1)
 		}
 	},
@@ -33,8 +33,11 @@ func init() {
 	sendCmd.PersistentFlags().StringVarP(&projectName, "project-name", "p", "", "name of the project to associate test reports with (required)")
 	sendCmd.PersistentFlags().StringVarP(&filePattern, "file-pattern", "f", "", "file name pattern of test reports to send to Fern (required)")
 	sendCmd.PersistentFlags().StringVarP(&tags, "tags", "t", "", "comma-separated tags to be included on runs")
-	sendCmd.MarkPersistentFlagRequired("fern-url")
-	sendCmd.MarkPersistentFlagRequired("project-name")
-	sendCmd.MarkPersistentFlagRequired("file-pattern")
+	err := sendCmd.MarkPersistentFlagRequired("fern-url")
+	err = sendCmd.MarkPersistentFlagRequired("project-name")
+	err = sendCmd.MarkPersistentFlagRequired("file-pattern")
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+	}
 	rootCmd.AddCommand(sendCmd)
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.guidewire.ccs.FernJavaClientTests" tests="3" skipped="0" failures="0" errors="0" hostname="jbridges-DY2R32JQ7G" time="0.12">
+  <properties/>
+  <testcase name="report()" classname="com.guidewire.ccs.FernJavaClientTests" time="0.106"/>
+  <testcase name="whackTest()" classname="com.guidewire.ccs.FernJavaClientTests" time="0.011"/>
+  <testcase name="goodTest()" classname="com.guidewire.ccs.FernJavaClientTests" time="0.001"/>
+</testsuite>

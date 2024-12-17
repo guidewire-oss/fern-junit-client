@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 	"io"
 	"log"
 	"os"
@@ -95,14 +96,20 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 
 	suiteRun.SuiteName = testSuite.Name
 
-	suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp)
-	if err != nil {
-		suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp+"Z")
+	if testSuite.Timestamp == "" {
+		suiteRun.StartTime = util.GlobalClock.Now()
+	} else {
+		suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp)
 		if err != nil {
-			err = fmt.Errorf("failed to parse suite start time: %w", err)
-			return
+			// Attempt to parse with a "Z" suffix for UTC time if the initial parsing fails
+			suiteRun.StartTime, err = time.Parse(time.RFC3339, testSuite.Timestamp+"Z")
+			if err != nil {
+				err = fmt.Errorf("failed to parse suite start time: %w", err)
+				return
+			}
 		}
 	}
+
 	suiteRun.EndTime, err = getEndTime(suiteRun.StartTime, testSuite.Time)
 	if err != nil {
 		err = fmt.Errorf("failed to calculate suite end time: %w", err)
@@ -110,8 +117,7 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 	}
 
 	if verbose {
-		log.Default().Printf("Suite start time: %s\n", suiteRun.StartTime.String())
-		log.Default().Printf("Suite end time: %s\n", suiteRun.EndTime.String())
+		log.Default().Printf("Resulting SuiteRun: %#v\n", suiteRun)
 	}
 
 	startTime := suiteRun.StartTime
@@ -141,12 +147,6 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 			return
 		}
 
-		if verbose {
-			log.Default().Printf("Test start time: %s\n", startTime.String())
-			log.Default().Printf("Test end time: %s\n", endTime.String())
-			log.Default().Printf("Test status: %s\n", status)
-		}
-
 		specRun := fern.SpecRun{
 			SpecDescription: testCase.Name,
 			Status:          status,
@@ -158,6 +158,10 @@ func parseTestSuite(testSuite junit.TestSuite, tags string, verbose bool) (suite
 		suiteRun.SpecRuns = append(suiteRun.SpecRuns, specRun)
 
 		startTime = endTime
+
+		if verbose {
+			log.Default().Printf("Resulting SpecRun: %#v\n", specRun)
+		}
 	}
 	return
 }
