@@ -13,6 +13,8 @@ type RealClock struct{}
 
 func (RealClock) Now() time.Time { return time.Now() }
 
+// MockClock uses a fixed time for Now(), which enables deep equality testing for
+// report parsing functions when input suites don't include timestamp values
 type MockClock struct {
 	fixedTime time.Time
 }

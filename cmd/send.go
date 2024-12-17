@@ -33,11 +33,17 @@ func init() {
 	sendCmd.PersistentFlags().StringVarP(&projectName, "project-name", "p", "", "name of the project to associate test reports with (required)")
 	sendCmd.PersistentFlags().StringVarP(&filePattern, "file-pattern", "f", "", "file name pattern of test reports to send to Fern (required)")
 	sendCmd.PersistentFlags().StringVarP(&tags, "tags", "t", "", "comma-separated tags to be included on runs")
-	err := sendCmd.MarkPersistentFlagRequired("fern-url")
-	err = sendCmd.MarkPersistentFlagRequired("project-name")
-	err = sendCmd.MarkPersistentFlagRequired("file-pattern")
-	if err != nil {
+	if err := sendCmd.MarkPersistentFlagRequired("fern-url"); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+		os.Exit(1)
+	}
+	if err := sendCmd.MarkPersistentFlagRequired("project-name"); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+		os.Exit(1)
+	}
+	if err := sendCmd.MarkPersistentFlagRequired("file-pattern"); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+		os.Exit(1)
 	}
 	rootCmd.AddCommand(sendCmd)
 }

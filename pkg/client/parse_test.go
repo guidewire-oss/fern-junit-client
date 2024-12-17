@@ -1,13 +1,13 @@
 package client
 
 import (
-	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/fern"
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/junit"
+	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 )
 
 func Test_parseReports(t *testing.T) {
@@ -27,7 +27,7 @@ func Test_parseReports(t *testing.T) {
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: reportsCombinedPattern,
-				tags:        "test,tagtest,9=-+_",
+				tags:        exampleTags,
 				verbose:     true,
 			},
 			wantErr: false,
@@ -37,7 +37,7 @@ func Test_parseReports(t *testing.T) {
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: reportFailedPath,
-				tags:        "test,tagtest,9=-+_",
+				tags:        exampleTags,
 				verbose:     true,
 			},
 			wantErr: false,
@@ -47,7 +47,17 @@ func Test_parseReports(t *testing.T) {
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: reportPassedPath,
-				tags:        "test,tagtest,9=-+_",
+				tags:        exampleTags,
+				verbose:     true,
+			},
+			wantErr: false,
+		},
+		{
+			name: "passed report without timestamp",
+			args: args{
+				testRun:     &fern.TestRun{},
+				filePattern: reportPassedWithoutTimestampPath,
+				tags:        exampleTags,
 				verbose:     true,
 			},
 			wantErr: false,
@@ -57,20 +67,10 @@ func Test_parseReports(t *testing.T) {
 			args: args{
 				testRun:     &fern.TestRun{},
 				filePattern: nonExistentFilePath,
-				tags:        "test,tagtest,9=-+_",
+				tags:        exampleTags,
 				verbose:     true,
 			},
 			wantErr: true,
-		},
-		{
-			name: "no optional fields",
-			args: args{
-				testRun:     &fern.TestRun{},
-				filePattern: reportNoOptionalFieldsPath,
-				tags:        "test,tagtest,9=-+_",
-				verbose:     true,
-			},
-			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -98,7 +98,7 @@ func Test_parseReport(t *testing.T) {
 			name: "failed report",
 			args: args{
 				filePath: reportFailedPath,
-				tags:     "test,tagtest,9=-+_",
+				tags:     exampleTags,
 				verbose:  true,
 			},
 			want:    fernTestRunFailed.SuiteRuns,
@@ -108,7 +108,7 @@ func Test_parseReport(t *testing.T) {
 			name: "passed report",
 			args: args{
 				filePath: reportPassedPath,
-				tags:     "test,tagtest,9=-+_",
+				tags:     exampleTags,
 				verbose:  true,
 			},
 			want:    fernTestRunPassed.SuiteRuns,
@@ -118,7 +118,7 @@ func Test_parseReport(t *testing.T) {
 			name: "non-existent report",
 			args: args{
 				filePath: nonExistentFilePath,
-				tags:     "test,tagtest,9=-+_",
+				tags:     exampleTags,
 				verbose:  true,
 			},
 			want:    nil,
@@ -156,7 +156,7 @@ func Test_parseTestSuite(t *testing.T) {
 			name: "failed suite",
 			args: args{
 				testSuite: junitTestSuiteFailed,
-				tags:      "test,tagtest,9=-+_",
+				tags:      exampleTags,
 				verbose:   true,
 			},
 			wantSuiteRun: fernTestRunFailed.SuiteRuns[0],
@@ -166,7 +166,7 @@ func Test_parseTestSuite(t *testing.T) {
 			name: "passed suite",
 			args: args{
 				testSuite: junitTestSuitePassed,
-				tags:      "test,tagtest,9=-+_",
+				tags:      exampleTags,
 				verbose:   true,
 			},
 			wantSuiteRun: fernTestRunPassed.SuiteRuns[0],
@@ -176,7 +176,7 @@ func Test_parseTestSuite(t *testing.T) {
 			name: "empty suite",
 			args: args{
 				testSuite: junit.TestSuite{},
-				tags:      "test,tagtest,9=-+_",
+				tags:      exampleTags,
 				verbose:   true,
 			},
 			wantSuiteRun: fern.SuiteRun{StartTime: util.GlobalClock.Now(), EndTime: util.GlobalClock.Now()},
@@ -273,7 +273,7 @@ func Test_convertToTags(t *testing.T) {
 		{
 			name: "simple string",
 			args: args{
-				tagString: "test,tagtest,9=-+_",
+				tagString: exampleTags,
 			},
 			wantTags: []fern.Tag{
 				{
