@@ -21,7 +21,8 @@ var sendCmd = &cobra.Command{
 	Short: "Send JUnit test reports to Fern",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := client.SendReports(fernUrl, projectName, filePattern, tags, verbose); err != nil {
+		metricsPath := "test/static/fern_test_run_metrics.txt"
+		if err := client.SendReports(fernUrl, projectName, filePattern, tags, verbose, metricsPath); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
 			os.Exit(1)
 		}

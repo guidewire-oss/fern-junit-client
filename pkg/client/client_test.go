@@ -64,7 +64,7 @@ func TestSendReports(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := SendReports(tt.args.fernUrl, tt.args.projectName, tt.args.filePattern, tt.args.tags, tt.args.verbose); (err != nil) != tt.wantErr {
+			if err := SendReports(tt.args.fernUrl, tt.args.projectName, tt.args.filePattern, tt.args.tags, tt.args.verbose, testMetricsPath); (err != nil) != tt.wantErr {
 				t.Errorf("SendReports() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
