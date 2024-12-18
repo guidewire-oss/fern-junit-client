@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 	"io"
 	"log"
 	"os"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/fern"
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/junit"
+	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 )
 
 func parseReports(testRun *fern.TestRun, filePattern string, tags string, verbose bool) error {

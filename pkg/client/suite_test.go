@@ -12,6 +12,7 @@ import (
 
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/fern"
 	"github.com/guidewire-oss/fern-junit-client/pkg/models/junit"
+	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 )
 
 const (
@@ -20,10 +21,10 @@ const (
 
 	nonExistentFilePath = "this_file_does_not_exist"
 
-	reportsCombinedPattern     = "../../test/static/*.xml"
-	reportFailedPath           = "../../test/static/junit_report_failed.xml"
-	reportPassedPath           = "../../test/static/junit_report_passed.xml"
-	reportNoOptionalFieldsPath = "../../test/static/junit_report_no_optional_passed.xml"
+	reportsCombinedPattern           = "../../test/static/*.xml"
+	reportFailedPath                 = "../../test/static/junit_report_failed.xml"
+	reportPassedPath                 = "../../test/static/junit_report_passed.xml"
+	reportPassedWithoutTimestampPath = "../../test/static/junit_report_passed_without_timestamp.xml"
 
 	fernTestRunCombinedPath = "../../test/static/fern_test_run_combined.json"
 	fernTestRunFailedPath   = "../../test/static/fern_test_run_failed.json"
@@ -42,6 +43,9 @@ var (
 )
 
 func init() {
+	// Initialize mock clock
+	util.GlobalClock = util.NewMockClock()
+
 	// Create mock Fern reporter
 	mockFernReporter = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
