@@ -32,6 +32,54 @@ fern-junit-client send -u "http://localhost:8080" -p "MyService" -f "report.xml"
 fern-junit-client send -u "http://localhost:8080" -p "MyService" -f "tests/*.xml"
 ```
 
+## Github Action
+
+### Inputs
+
+| Name                 | Required | Type    | Default | Description                                                                        |
+|----------------------|----------|---------|---------|------------------------------------------------------------------------------------|
+| url                  | true     | string  |         | URL of Fern reporter                                                               |
+| file-pattern         | true     | string  |         | Directory or pattern where JUnit reports get generated (accepts `*` as a wildcard) |
+| project-name         | true     | string  |         | Name of the project to display under in Fern                                       |
+| tags                 | false    | string  |         | Comma-separated tags to associate with the suite run                               |
+| verbose              | false    | boolean | false   | Whether to log verbosely (**note**: may increase log size significantly)           |
+| generate-job-summary | false    | boolean | true    | Whether to generate a job summary with passed/failed/skipped counts                |
+
+### Outputs
+
+| Name          | Type    | Description                       |
+|---------------|---------|-----------------------------------|
+| tests-passed  | integer | Number of tests that passed       |
+| tests-failed  | integer | Number of tests that failed       |
+| tests-skipped | integer | Number of tests that were skipped |
+
+### Example Workflow
+
+```yaml
+name: 'Fern JUnit Client Workflow'
+on:
+  push:
+    branches:
+      - main
+jobs:
+  fern-junit-client:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run Tests
+          ...
+      - name: Report tests to fern
+        uses: guidewire-oss/fern-junit-client@latest
+        with:
+          url: 'https://fern.mydomain.com'
+          file-pattern: 'tests/*.xml'
+          project-name: 'My Service'
+          tags: 'cpu,'
+          verbose: false
+          generate-job-summary: true
+```
+
 ## See Also
 
 * [Fern UI](https://github.com/guidewire-oss/fern-ui)

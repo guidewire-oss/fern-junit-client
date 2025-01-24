@@ -29,6 +29,8 @@ const (
 	fernTestRunCombinedPath = "../../test/static/fern_test_run_combined.json"
 	fernTestRunFailedPath   = "../../test/static/fern_test_run_failed.json"
 	fernTestRunPassedPath   = "../../test/static/fern_test_run_passed.json"
+
+	testMetricsPath = "../../test/static/fern_test_run_metrics.txt"
 )
 
 var (
@@ -132,7 +134,7 @@ func TestGenerateStaticJsonFiles(t *testing.T) {
 		}))
 		defer mockFernReporter.Close()
 		// Run SendReports with input
-		if err := SendReports(mockFernReporter.URL, testProjectName, filePattern, exampleTags, true); err != nil {
+		if err := SendReports(mockFernReporter.URL, testProjectName, filePattern, exampleTags, true, testMetricsPath); err != nil {
 			panic(fmt.Errorf("failed to generate Fern test run JSON for '%s' test case (%s): %w", testCase, filePattern, err))
 		}
 	}
