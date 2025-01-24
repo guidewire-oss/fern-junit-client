@@ -25,13 +25,13 @@ inputs:
 outputs:
   tests-passed:
     description: 'Number of tests that passed'
-    value: ${{ steps.run-client.outputs.tests-passed }}
+    value: ${{ steps.gen-metrics.outputs.tests-passed }}
   tests-failed:
     description: 'Number of tests that failed'
-    value: ${{ steps.run-client.outputs.tests-failed }}
+    value: ${{ steps.gen-metrics.outputs.tests-failed }}
   tests-skipped:
     description: 'Number of tests that were skipped'
-    value: ${{ steps.run-client.outputs.tests-skipped }}
+    value: ${{ steps.gen-metrics.outputs.tests-skipped }}
 runs:
   using: 'composite'
   steps:
@@ -67,15 +67,17 @@ runs:
 
     - name: Generate metrics
       shell: bash
+      id: gen-metrics
       run: |
         generate_js="${{ inputs.generate-job-summary }}"
+        metrics_path="test/static/fern_test_run_metrics.txt"
         
         # Read the metrics file
-        if [ -f "test/generated/fern_test_run_metrics.txt" ]; then
+        if [ -f "$metrics_path" ]; then
           # Parse the file
-          passed=$(grep "passed:" "test/generated/fern_test_run_metrics.txt" | cut -d' ' -f2)
-          failed=$(grep "failed:" "test/generated/fern_test_run_metrics.txt" | cut -d' ' -f2)
-          skipped=$(grep "skipped:" "test/generated/fern_test_run_metrics.txt" | cut -d' ' -f2)
+          passed=$(grep "passed:" "$metrics_path" | cut -d' ' -f2)
+          failed=$(grep "failed:" "$metrics_path" | cut -d' ' -f2)
+          skipped=$(grep "skipped:" "$metrics_path" | cut -d' ' -f2)
       
           # Set output variables
           echo "tests-passed=${passed:-0}" >> $GITHUB_OUTPUT
