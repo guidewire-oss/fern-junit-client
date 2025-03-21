@@ -7,7 +7,7 @@ import (
 func TestSendReports(t *testing.T) {
 	type args struct {
 		fernUrl     string
-		projectName string
+		projectId   string
 		filePattern string
 		tags        string
 		verbose     bool
@@ -21,7 +21,7 @@ func TestSendReports(t *testing.T) {
 			name: "combined reports",
 			args: args{
 				fernUrl:     mockFernReporter.URL,
-				projectName: testProjectName,
+				projectId:   testProjectId,
 				filePattern: reportsCombinedPattern,
 				tags:        exampleTags,
 				verbose:     true,
@@ -32,7 +32,7 @@ func TestSendReports(t *testing.T) {
 			name: "failed report",
 			args: args{
 				fernUrl:     mockFernReporter.URL,
-				projectName: testProjectName,
+				projectId:   testProjectId,
 				filePattern: reportFailedPath,
 				tags:        exampleTags,
 				verbose:     true,
@@ -43,7 +43,7 @@ func TestSendReports(t *testing.T) {
 			name: "passed report",
 			args: args{
 				fernUrl:     mockFernReporter.URL,
-				projectName: testProjectName,
+				projectId:   testProjectId,
 				filePattern: reportPassedPath,
 				tags:        exampleTags,
 				verbose:     true,
@@ -54,7 +54,7 @@ func TestSendReports(t *testing.T) {
 			name: "no reports",
 			args: args{
 				fernUrl:     mockFernReporter.URL,
-				projectName: testProjectName,
+				projectId:   testProjectId,
 				filePattern: nonExistentFilePath,
 				tags:        exampleTags,
 				verbose:     true,
@@ -64,7 +64,7 @@ func TestSendReports(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := SendReports(tt.args.fernUrl, tt.args.projectName, tt.args.filePattern, tt.args.tags, tt.args.verbose); (err != nil) != tt.wantErr {
+			if err := SendReports(tt.args.fernUrl, tt.args.projectId, tt.args.filePattern, tt.args.tags, tt.args.verbose); (err != nil) != tt.wantErr {
 				t.Errorf("SendReports() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
