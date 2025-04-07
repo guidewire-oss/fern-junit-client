@@ -7,9 +7,9 @@ import (
 	"github.com/guidewire-oss/fern-junit-client/pkg/util"
 )
 
-func SendReports(fernUrl, projectName, filePattern string, tags string, verbose bool) error {
+func SendReports(fernUrl, projectId, filePattern string, tags string, verbose bool) error {
 	var testRun fern.TestRun
-	testRun.TestProjectName = projectName
+	testRun.TestProjectID = projectId
 	testRun.TestSeed = uint64(util.GlobalClock.Now().Nanosecond())
 
 	log.Default().Println("Parsing reports...")

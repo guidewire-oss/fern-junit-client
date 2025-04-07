@@ -14,6 +14,9 @@ To install the CLI, use the following command:
 go install github.com/guidewire-oss/fern-junit-client@latest
 ```
 
+## Registering Application with Fern-Reporter
+TBA
+
 ## Usage
 
 To see all available options, use `fern-junit-client help`

@@ -5,12 +5,12 @@ import (
 )
 
 type TestRun struct {
-	ID              uint64     `json:"id"`
-	TestProjectName string     `json:"test_project_name"`
-	TestSeed        uint64     `json:"test_seed"`
-	StartTime       time.Time  `json:"start_time"`
-	EndTime         time.Time  `json:"end_time"`
-	SuiteRuns       []SuiteRun `json:"suite_runs"`
+	ID            uint64     `json:"id"`
+	TestProjectID string     `json:"test_project_id"`
+	TestSeed      uint64     `json:"test_seed"`
+	StartTime     time.Time  `json:"start_time"`
+	EndTime       time.Time  `json:"end_time"`
+	SuiteRuns     []SuiteRun `json:"suite_runs"`
 }
 
 type SuiteRun struct {
