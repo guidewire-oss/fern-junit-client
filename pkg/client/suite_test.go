@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	testProjectName = "TestProject"
-	exampleTags     = "test,tagtest,9=-+_"
+	testProjectId = "77b34e74-5631-5a71-b8ce-97b9d6bab10a"
+	exampleTags   = "test,tagtest,9=-+_"
 
 	nonExistentFilePath = "this_file_does_not_exist"
 
@@ -132,7 +132,7 @@ func TestGenerateStaticJsonFiles(t *testing.T) {
 		}))
 		defer mockFernReporter.Close()
 		// Run SendReports with input
-		if err := SendReports(mockFernReporter.URL, testProjectName, filePattern, exampleTags, true); err != nil {
+		if err := SendReports(mockFernReporter.URL, testProjectId, filePattern, exampleTags, true); err != nil {
 			panic(fmt.Errorf("failed to generate Fern test run JSON for '%s' test case (%s): %w", testCase, filePattern, err))
 		}
 	}
