@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	testProjectId = "TestProject" //to be coverted into a UUUID after registered with reporter
+	testProjectId = "77b34e74-5631-5a71-b8ce-97b9d6bab10a"
 	exampleTags   = "test,tagtest,9=-+_"
 
 	nonExistentFilePath = "this_file_does_not_exist"
