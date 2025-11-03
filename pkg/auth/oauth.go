@@ -34,7 +34,9 @@ type OAuthClient struct {
 }
 
 // NewOAuthClient creates a new OAuth client
-func NewOAuthClient() *OAuthClient {
+// Returns nil if OAuth is not configured (no AUTH_URL set)
+// Returns an error if OAuth is partially configured (missing required parameters)
+func NewOAuthClient() (*OAuthClient, error) {
 	config := &OAuthConfig{
 		TokenURL:       os.Getenv("AUTH_URL"),
 		ClientID:       os.Getenv("FERN_AUTH_CLIENT_ID"),
@@ -42,19 +44,27 @@ func NewOAuthClient() *OAuthClient {
 		Scopes:         os.Getenv("FERN_CLIENT_SCOPE"),
 	}
 
-	// If token URL is not set, OAuth is disabled
+	// If token URL is not set, OAuth is disabled - this is OK
 	if config.TokenURL == "" {
-		return nil
+		return nil, nil
 	}
 
-	// Validate required OAuth parameters
-	if config.ClientID == "" || config.ClientPassword == "" {
-		return nil
+	// If AUTH_URL is set, validate that we have all required OAuth parameters
+	var missingParams []string
+	if config.ClientID == "" {
+		missingParams = append(missingParams, "FERN_AUTH_CLIENT_ID")
+	}
+	if config.ClientPassword == "" {
+		missingParams = append(missingParams, "FERN_AUTH_CLIENT_SECRET")
+	}
+
+	if len(missingParams) > 0 {
+		return nil, fmt.Errorf("OAuth configuration error: AUTH_URL is set but missing required parameters: %s", strings.Join(missingParams, ", "))
 	}
 
 	return &OAuthClient{
 		config: config,
-	}
+	}, nil
 }
 
 // GetToken fetches a new OAuth token or returns the cached one if still valid

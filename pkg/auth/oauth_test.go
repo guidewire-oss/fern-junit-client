@@ -84,6 +84,8 @@ func TestNewOAuthClient(t *testing.T) {
 			clientPassword string
 			scopes         string
 			expectNil      bool
+			expectError    bool
+			errorContains  string
 		}{
 			{
 				name:           "all OAuth vars set with scopes",
@@ -92,6 +94,7 @@ func TestNewOAuthClient(t *testing.T) {
 				clientPassword: testClientSecret,
 				scopes:         testScopes,
 				expectNil:      false,
+				expectError:    false,
 			},
 			{
 				name:           "OAuth vars set without scopes",
@@ -100,6 +103,7 @@ func TestNewOAuthClient(t *testing.T) {
 				clientPassword: testClientSecret,
 				scopes:         "",
 				expectNil:      false,
+				expectError:    false,
 			},
 			{
 				name:           "missing token URL (OAuth disabled)",
@@ -107,6 +111,7 @@ func TestNewOAuthClient(t *testing.T) {
 				clientID:       testClientID,
 				clientPassword: testClientSecret,
 				expectNil:      true,
+				expectError:    false,
 			},
 			{
 				name:           "missing client ID",
@@ -114,6 +119,8 @@ func TestNewOAuthClient(t *testing.T) {
 				clientID:       "",
 				clientPassword: testClientSecret,
 				expectNil:      true,
+				expectError:    true,
+				errorContains:  "FERN_AUTH_CLIENT_ID",
 			},
 			{
 				name:           "missing client password",
@@ -121,19 +128,32 @@ func TestNewOAuthClient(t *testing.T) {
 				clientID:       testClientID,
 				clientPassword: "",
 				expectNil:      true,
+				expectError:    true,
+				errorContains:  "FERN_AUTH_CLIENT_SECRET",
 			},
 			{
 				name:      "all vars empty",
 				tokenURL:  "",
 				clientID:  "",
 				expectNil: true,
+				expectError: false,
 			},
 		}
 
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				setOAuthEnv(tt.tokenURL, tt.clientID, tt.clientPassword, tt.scopes)
-				client := NewOAuthClient()
+				client, err := NewOAuthClient()
+
+				if tt.expectError {
+					if err == nil {
+						t.Errorf("Expected error but got nil")
+					} else if tt.errorContains != "" && !strings.Contains(err.Error(), tt.errorContains) {
+						t.Errorf("Error = %v, should contain %v", err, tt.errorContains)
+					}
+				} else if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
 
 				if tt.expectNil && client != nil {
 					t.Errorf("Expected nil but got client")

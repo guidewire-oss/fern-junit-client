@@ -75,7 +75,6 @@ func createTokenResponse(token string, scopes string) auth.TokenResponse {
 	}
 }
 
-
 // Helper function to verify Fern server request
 func verifyFernRequest(t *testing.T, r *http.Request, expectedAuth string, expectedPath string) {
 	t.Helper()
@@ -103,19 +102,18 @@ func verifyFernRequest(t *testing.T, r *http.Request, expectedAuth string, expec
 	}
 }
 
-
 func Test_sendTestRun_WithAuthentication(t *testing.T) {
 	withCleanOAuthEnv(t, func() {
 		tests := []struct {
-			name           string
-			setupEnv       func(oauthURL string)
-			oauthStatus    int
-			oauthToken     string
-			fernStatus     int
-			expectedAuth   string
-			expectedPath   string
-			expectError    bool
-			errorContains  string
+			name          string
+			setupEnv      func(oauthURL string)
+			oauthStatus   int
+			oauthToken    string
+			fernStatus    int
+			expectedAuth  string
+			expectedPath  string
+			expectError   bool
+			errorContains string
 		}{
 			{
 				name: "successful authentication and send",
@@ -191,11 +189,32 @@ func Test_sendTestRun_WithAuthentication(t *testing.T) {
 					os.Setenv("AUTH_URL", oauthURL)
 					os.Unsetenv("FERN_AUTH_CLIENT_ID")
 					os.Setenv("FERN_AUTH_CLIENT_SECRET", testClientSecret)
+					os.Unsetenv("FERN_API_ENDPOINT_PATH") // Clear custom endpoint
 				},
-				fernStatus:   http.StatusOK,
-				expectedAuth: "",
-				expectedPath: testAPIPath,
-				expectError:  false,
+				expectError:   true,
+				errorContains: "OAuth configuration error: AUTH_URL is set but missing required parameters: FERN_AUTH_CLIENT_ID",
+			},
+			{
+				name: "partial oauth config - missing client secret",
+				setupEnv: func(oauthURL string) {
+					os.Setenv("AUTH_URL", oauthURL)
+					os.Setenv("FERN_AUTH_CLIENT_ID", testClientID)
+					os.Unsetenv("FERN_AUTH_CLIENT_SECRET")
+					os.Unsetenv("FERN_API_ENDPOINT_PATH") // Clear custom endpoint
+				},
+				expectError:   true,
+				errorContains: "OAuth configuration error: AUTH_URL is set but missing required parameters: FERN_AUTH_CLIENT_SECRET",
+			},
+			{
+				name: "partial oauth config - missing both client id and secret",
+				setupEnv: func(oauthURL string) {
+					os.Setenv("AUTH_URL", oauthURL)
+					os.Unsetenv("FERN_AUTH_CLIENT_ID")
+					os.Unsetenv("FERN_AUTH_CLIENT_SECRET")
+					os.Unsetenv("FERN_API_ENDPOINT_PATH") // Clear custom endpoint
+				},
+				expectError:   true,
+				errorContains: "OAuth configuration error: AUTH_URL is set but missing required parameters: FERN_AUTH_CLIENT_ID, FERN_AUTH_CLIENT_SECRET",
 			},
 		}
 

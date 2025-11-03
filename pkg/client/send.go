@@ -50,7 +50,11 @@ func sendTestRun(testRun fern.TestRun, fernUrl string, verbose bool) error {
 	}
 
 	// Create OAuth client
-	oauthClient := auth.NewOAuthClient()
+	oauthClient, err := auth.NewOAuthClient()
+	if err != nil {
+		// OAuth configuration error - fail fast
+		return fmt.Errorf("OAuth configuration error: %w", err)
+	}
 
 	// Create HTTP request
 	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(payload))
