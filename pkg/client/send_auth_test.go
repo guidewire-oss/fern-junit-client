@@ -348,7 +348,7 @@ func TestSendReports_Authentication(t *testing.T) {
 			setOAuthTestEnv(mockOAuthServer.URL, integrationClientID, integrationSecret, "")
 
 			// Run SendReports
-			err := SendReports(mockFernServer.URL, testProjectId, reportPassedPath, "auth-test", true)
+			err := SendReports(mockFernServer.URL, testProjectId, reportPassedPath, "auth-test", "", "", "", true)
 			if err != nil {
 				t.Fatalf("SendReports() with authentication failed: %v", err)
 			}
@@ -394,7 +394,7 @@ func TestSendReports_Authentication(t *testing.T) {
 			defer mockFernServer.Close()
 
 			// Run SendReports
-			err := SendReports(mockFernServer.URL, testProjectId, reportPassedPath, "no-auth-test", false)
+			err := SendReports(mockFernServer.URL, testProjectId, reportPassedPath, "no-auth-test", "", "", "", false)
 			if err != nil {
 				t.Fatalf("SendReports() without authentication failed: %v", err)
 			}
