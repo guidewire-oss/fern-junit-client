@@ -10,6 +10,9 @@ type TestRun struct {
 	TestSeed      uint64     `json:"test_seed"`
 	StartTime     time.Time  `json:"start_time"`
 	EndTime       time.Time  `json:"end_time"`
+	GitBranch     string     `json:"git_branch,omitempty"`
+	GitSha        string     `json:"git_sha,omitempty"`
+	Environment   string     `json:"environment,omitempty"`
 	SuiteRuns     []SuiteRun `json:"suite_runs"`
 }
 
