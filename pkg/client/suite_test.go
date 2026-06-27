@@ -132,7 +132,7 @@ func TestGenerateStaticJsonFiles(t *testing.T) {
 		}))
 		defer mockFernReporter.Close()
 		// Run SendReports with input
-		if err := SendReports(mockFernReporter.URL, testProjectId, filePattern, exampleTags, true); err != nil {
+		if err := SendReports(SendOptions{FernURL: mockFernReporter.URL, ProjectID: testProjectId, FilePattern: filePattern, Tags: exampleTags, Branch: "", CommitSha: "", Environment: "", Verbose: true}); err != nil {
 			panic(fmt.Errorf("failed to generate Fern test run JSON for '%s' test case (%s): %w", testCase, filePattern, err))
 		}
 	}
