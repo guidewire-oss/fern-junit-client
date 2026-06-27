@@ -73,6 +73,29 @@ func TestSendReportsProvenance(t *testing.T) {
 		}
 	})
 
+	t.Run("falls back to secondary (GitLab/FERN) env vars", func(t *testing.T) {
+		// Null the primary GitHub vars so the secondary candidates win — robust
+		// even on a GitHub Actions runner where GITHUB_REF_NAME/SHA are set.
+		t.Setenv("GITHUB_REF_NAME", "")
+		t.Setenv("GITHUB_SHA", "")
+		t.Setenv("CI_ENVIRONMENT_NAME", "")
+		t.Setenv("CI_COMMIT_REF_NAME", "feature/gl")
+		t.Setenv("CI_COMMIT_SHA", "cafef00d")
+		t.Setenv("FERN_ENVIRONMENT", "review")
+
+		var got fern.TestRun
+		srv := captureServer(t, &got)
+		defer srv.Close()
+
+		if err := SendReports(srv.URL, testProjectId, reportPassedPath, exampleTags, "", "", "", false); err != nil {
+			t.Fatalf("SendReports() error = %v", err)
+		}
+		if got.GitBranch != "feature/gl" || got.GitSha != "cafef00d" || got.Environment != "review" {
+			t.Errorf("secondary fallback = {branch:%q sha:%q env:%q}, want {feature/gl cafef00d review}",
+				got.GitBranch, got.GitSha, got.Environment)
+		}
+	})
+
 	t.Run("explicit flag overrides env var", func(t *testing.T) {
 		t.Setenv("GITHUB_REF_NAME", "main")
 
